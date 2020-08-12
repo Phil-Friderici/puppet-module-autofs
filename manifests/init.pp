@@ -27,7 +27,6 @@ class autofs (
   case $::osfamily {
     'RedHat': {
       $autofs_package_default     = 'autofs'
-      $autofs_service_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/sysconfig/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
@@ -35,7 +34,6 @@ class autofs (
     }
     'Suse': {
       $autofs_package_default     = 'autofs'
-      $autofs_service_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/sysconfig/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
@@ -43,7 +41,6 @@ class autofs (
     }
     'Debian': {
       $autofs_package_default     = 'autofs'
-      $autofs_service_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/default/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
@@ -51,7 +48,6 @@ class autofs (
     }
     'Solaris': {
       $autofs_package_default     = 'SUNWatfsr'
-      $autofs_service_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/default/autofs'
       $autofs_auto_master_default = '/etc/auto_master'
       $autofs_sysconfig_template  = 'autofs/autofs_solaris.erb'
@@ -68,7 +64,7 @@ class autofs (
     $autofs_package_real = $autofs_package
   }
   if $autofs_service == 'DEFAULT' {
-    $autofs_service_real = $autofs_service_default
+    $autofs_service_real = 'autofs'
   } else {
     $autofs_service_real = $autofs_service
   }

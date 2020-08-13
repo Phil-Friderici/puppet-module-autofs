@@ -99,9 +99,9 @@ Absolute path for autofs sysconfig location. Unset, this parameter will choose t
 
 ---
 #### autofs_service (type: String)
-Service name for autofs to manage. Unset, this parameter will choose the appropriate default for the system.
+Service name for autofs to manage.
 
-- Default: **undef**
+- Default: 'autofs'
 
 ---
 #### autofs_auto_master (type: String)

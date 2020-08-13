@@ -15,7 +15,7 @@ class autofs (
   $maps_hiera_merge           = false,
   $autofs_package             = undef,
   $autofs_sysconfig           = undef,
-  $autofs_service             = undef,
+  $autofs_service             = 'autofs',
   $autofs_auto_master         = undef,
   $use_nis_maps               = true,
   $use_dash_hosts_for_net     = true,
@@ -64,11 +64,6 @@ class autofs (
     default: { $autofs_package_real = $autofs_package }
   }
 
-  case $autofs_service {
-    undef:   { $autofs_service_real = $autofs_service_default }
-    default: { $autofs_service_real = $autofs_service }
-  }
-
   case $autofs_sysconfig {
     undef:   { $autofs_sysconfig_real = $autofs_sysconfig_default }
     default: { $autofs_sysconfig_real = $autofs_sysconfig }
@@ -81,7 +76,7 @@ class autofs (
 
   # variable validations
   if is_string($autofs_package_real) == false { fail('autofs::autofs_package is not a string.') }
-  if is_string($autofs_service_real) == false { fail('autofs::autofs_service is not a string.') }
+  if is_string($autofs_service)      == false { fail('autofs::autofs_service is not a string.') }
 
 
   validate_absolute_path(
@@ -159,7 +154,7 @@ class autofs (
 
   service { 'autofs':
     ensure    => $service_ensure,
-    name      => $autofs_service_real,
+    name      => $autofs_service,
     enable    => $service_enable_real,
     require   => Package['autofs'],
     subscribe => [

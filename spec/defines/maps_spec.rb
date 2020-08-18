@@ -48,6 +48,23 @@ describe 'autofs::map' do
         )
       }
     end
+
+    context 'with mappath set to valid string </test/ing>' do
+      let(:params) { { mappath: '/test/ing' } }
+
+      it {
+        is_expected.to contain_file('mountmap_example').with('path' => '/test/ing' )
+      }
+    end
+
+    context 'with mapname set to valid string <testname>' do
+      let(:params) { { mapname: 'testname' } }
+
+      it {
+        is_expected.to contain_file('testname')
+      }
+    end
+
   end
 
   context 'with non-functional parameters set' do
@@ -77,11 +94,23 @@ describe 'autofs::map' do
     let(:title) { 'example' }
 
     validations = {
+      'absolute_path' => {
+        name:    ['mappath'],
+        valid:   ['/absolute/filepath', '/absolute/directory/'],
+        invalid: ['../invalid', 3, 2.42, ['array'], { 'ha' => 'sh' }, false],
+        message: 'is not an absolute path', # source: stdlib:validate_absolute_path
+      },
       'array / string' => {
         name:    ['mounts'],
         valid:   [['array'], 'string'],
         invalid: [{ 'ha' => 'sh' }, 3, 2.42, false],
         message: 'is not an array', # source: autofs::maps:fail
+      },
+      'string' => {
+        name:    ['mapname'],
+        valid:   ['string'],
+        invalid: [['array'], { 'ha' => 'sh' }, 3, 2.42, false],
+        message: 'is not a string', # source: autofs::maps:fail
       },
       'string for file source' => {
         name:    ['file'],

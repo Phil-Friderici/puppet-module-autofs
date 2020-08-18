@@ -278,10 +278,22 @@ describe 'autofs' do
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test#{tail}") }
     end
 
+    context '<test => { mappath => /etc/auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mappath' => '/etc/auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.testing#{tail}") }
+    end
+
     context '<test => { mountpoint => mountpoint, maptype => nis }>' do
       let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis test#{tail}") }
+    end
+
+    context '<test => { mountpoint => mountpoint, maptype => nis, mapname => auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'mapname' => 'auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis auto.testing#{tail}") }
     end
 
     context '<test => { mountpoint => mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
@@ -331,9 +343,11 @@ describe 'autofs' do
         |
         |/test1 /etc/auto.test1
         |/mountpoint2 /etc/auto.test2
-        |/mountpoint3 /etc/auto.test3 ro
-        |/mountpoint4 nis test4
-        |/mountpoint5 -null
+        |/mountpoint3 /etc/auto.testing
+        |/mountpoint4 /etc/auto.test4 ro
+        |/mountpoint5 nis test5
+        |/mountpoint6 nis auto.test
+        |/mountpoint7 -null
         |
         |+auto.master
       END
@@ -343,9 +357,11 @@ describe 'autofs' do
           maps: {
             'test1' => {},
             'test2' => { 'mountpoint' => 'mountpoint2' },
-            'test3' => { 'mountpoint' => 'mountpoint3', 'options' => 'ro' },
-            'test4' => { 'mountpoint' => 'mountpoint4', 'maptype' => 'nis' },
-            'test5' => { 'mountpoint' => 'mountpoint5', 'manage' => false },
+            'test3' => { 'mountpoint' => 'mountpoint3', 'mappath' => '/etc/auto.testing' },
+            'test4' => { 'mountpoint' => 'mountpoint4', 'options' => 'ro' },
+            'test5' => { 'mountpoint' => 'mountpoint5', 'maptype' => 'nis' },
+            'test6' => { 'mountpoint' => 'mountpoint6', 'maptype' => 'nis', 'mapname' => 'auto.test' },
+            'test7' => { 'mountpoint' => 'mountpoint7', 'manage' => false },
           },
         }
       end

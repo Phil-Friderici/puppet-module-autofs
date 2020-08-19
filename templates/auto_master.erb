@@ -12,12 +12,13 @@
 <%     @maps_real[key]['mapname'] ? @mapname = @maps_real[key]['mapname'] : @mapname = key -%>
 <%     @maps_real[key]['mappath'] ? @mappath = @maps_real[key]['mappath'] : @mappath = "/etc/auto.#{key}" -%>
 <%     if @maps_real[key]['mountpoint'] -%>
+<%       @maps_real[key]['mountpoint'].chars.first == '/' ? @mountpoint = @maps_real[key]['mountpoint'] : @mountpoint = "/#{@maps_real[key]['mountpoint']}" -%>
 <%       if @maps_real[key]['maptype'] -%>
-/<%= @maps_real[key]['mountpoint'] %><% if @osfamily != 'Solaris' %> <%= @maps_real[key]['maptype'] %><% end %> <%= @mapname -%>
+<%= @mountpoint %><% if @osfamily != 'Solaris' %> <%= @maps_real[key]['maptype'] %><% end %> <%= @mapname -%>
 <%       elsif @maps_real[key]['manage'] == false -%>
-/<%= @maps_real[key]['mountpoint'] %> -null<% # remove linebreak -%>
+<%= @mountpoint %> -null<% # remove linebreak -%>
 <%       else -%>
-/<%= @maps_real[key]['mountpoint'] %> <%= @mappath -%>
+<%= @mountpoint %> <%= @mappath -%>
 <%       end -%>
 <%     else -%>
 /<%= key %> <%= @mappath -%>

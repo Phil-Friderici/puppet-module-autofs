@@ -141,7 +141,7 @@ Set this to true makes autofs use `-hosts` for the /net mountpoint. Set to false
 ## autofs::map parameters
 ---
 #### mountpoint (type: String)
-Specify the mountpoint in `auto.master`.
+Absolute path of the mountpoint in `auto.master`.
 
 - Default: **undef**
 

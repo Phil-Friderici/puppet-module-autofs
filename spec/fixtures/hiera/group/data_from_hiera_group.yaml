@@ -1,10 +1,10 @@
 ---
 autofs::maps:
   group:
-    mountpoint: 'from_hiera_group'
+    mountpoint: '/from_hiera_group'
     mounts:
       - 'group nfsserver:/group/from/hiera/group'
   home_from_hiera_group:
-    mountpoint: 'home'
+    mountpoint: '/home'
     mounts:
       - 'home nfsserver:/home/from/hiera/group'

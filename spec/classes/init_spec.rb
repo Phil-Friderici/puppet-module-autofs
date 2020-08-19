@@ -70,7 +70,7 @@ describe 'autofs' do
           'group'   => 'root',
           'mode'    => '0644',
           'require' => 'Package[autofs]',
-          'content' => "#{auto_master_header}/net -hosts\n\n\n+auto.master\n",
+          'content' => "#{auto_master_header}/net -hosts\n\n+auto.master\n",
         )
       }
       it {
@@ -134,13 +134,13 @@ describe 'autofs' do
       it { is_expected.to contain_file('autofs_sysconfig').with_content(%r{^LOGGING=\"verbose\"$}) }
     end
 
-    context "with maps set to valid value <{'home'=>{'mountpoint'=>'home','mounts'=>['spec nfsserver:/path/to/spec','test nfsserver:/path/to/test']}}>" do
-      let(:params) { { maps: { 'home' => { 'mountpoint' => 'home', 'mounts' => ['spec nfsserver:/path/to/spec', 'test nfsserver:/path/to/test'] } } } }
+    context "with maps set to valid value <{'home'=>{'mountpoint'=>'/home','mounts'=>['spec nfsserver:/path/to/spec','test nfsserver:/path/to/test']}}>" do
+      let(:params) { { maps: { 'home' => { 'mountpoint' => '/home', 'mounts' => ['spec nfsserver:/path/to/spec', 'test nfsserver:/path/to/test'] } } } }
 
       it { is_expected.to have_autofs__map_resource_count(1) }
       it {
         is_expected.to contain_autofs__map('home').only_with(
-          'mountpoint' => 'home',
+          'mountpoint' => '/home',
           'mounts'     => ['spec nfsserver:/path/to/spec', 'test nfsserver:/path/to/test'],
           'manage'     => true,
         )
@@ -161,14 +161,14 @@ describe 'autofs' do
         it { is_expected.to have_autofs__map_resource_count(2) }
         it {
           is_expected.to contain_autofs__map('group').only_with(
-            'mountpoint' => 'from_hiera_fqdn',
+            'mountpoint' => '/from_hiera_fqdn',
             'mounts'     => ['group nfsserver:/group/from/hiera/fqdn'],
             'manage'     => true,
           )
         }
         it {
           is_expected.to contain_autofs__map('home_from_hiera_fqdn').only_with(
-            'mountpoint' => 'home',
+            'mountpoint' => '/home',
             'mounts'     => ['home1 nfsserver:/home/from/hiera/fqdn/1', 'home2 nfsserver:/home/from/hiera/fqdn/2'],
             'manage'     => true,
           )
@@ -181,21 +181,21 @@ describe 'autofs' do
         it { is_expected.to have_autofs__map_resource_count(3) }
         it {
           is_expected.to contain_autofs__map('group').only_with(
-            'mountpoint' => 'from_hiera_fqdn',
+            'mountpoint' => '/from_hiera_fqdn',
             'mounts'     => ['group nfsserver:/group/from/hiera/fqdn'],
             'manage'     => true,
           )
         }
         it {
           is_expected.to contain_autofs__map('home_from_hiera_fqdn').only_with(
-            'mountpoint' => 'home',
+            'mountpoint' => '/home',
             'mounts'     => ['home1 nfsserver:/home/from/hiera/fqdn/1', 'home2 nfsserver:/home/from/hiera/fqdn/2'],
             'manage'     => true,
           )
         }
         it {
           is_expected.to contain_autofs__map('home_from_hiera_group').only_with(
-            'mountpoint' => 'home',
+            'mountpoint' => '/home',
             'mounts'     => ['home nfsserver:/home/from/hiera/group'],
             'manage'     => true,
           )
@@ -224,19 +224,19 @@ describe 'autofs' do
     context 'with use_nis_maps set to valid value <false>' do
       let(:params) { { use_nis_maps: false } }
 
-      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net -hosts\n\n\n") }
+      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net -hosts\n") }
     end
 
     context 'with use_dash_hosts_for_net set to valid value <false>' do
       let(:params) { { use_dash_hosts_for_net: false } }
 
-      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net \/etc\/auto.net --timeout=60\n\n\n+auto.master\n") }
+      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net \/etc\/auto.net --timeout=60\n\n+auto.master\n") }
     end
 
     context 'with nis_master_name set to valid value <bike.meister>' do
       let(:params) { { nis_master_name: 'bike.meister' } }
 
-      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net -hosts\n\n\n+bike\.meister\n") }
+      it { is_expected.to contain_file('auto.master').with_content("#{auto_master_header}/net -hosts\n\n+bike\.meister\n") }
     end
 
     context 'with service_ensure set to valid value <stopped>' do
@@ -272,26 +272,38 @@ describe 'autofs' do
       it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.test#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint' } } } }
+    context '<test => { mountpoint => /mountpoint }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, maptype => nis }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis' } } } }
+    context '<test => { mappath => /etc/auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mappath' => '/etc/auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.testing#{tail}") }
+    end
+
+    context '<test => { mountpoint => /mountpoint, maptype => nis }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis test#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'manage' => false } } } }
+    context '<test => { mountpoint => /mountpoint, maptype => nis, mapname => auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis', 'mapname' => 'auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis auto.testing#{tail}") }
+    end
+
+    context '<test => { mountpoint => /mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis', 'manage' => false } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis test#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, manage => false }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'manage' => false } } } }
+    context '<test => { mountpoint => /mountpoint, manage => false }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'manage' => false } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint -null#{tail}") }
     end
@@ -303,20 +315,20 @@ describe 'autofs' do
       it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.test ro#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'options' => 'ro' } } } }
+    context '<test => { mountpoint => /mountpoint, options => ro }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'options' => 'ro' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test ro#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, maptype => nis, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'options' => 'ro' } } } }
+    context '<test => { mountpoint => /mountpoint, maptype => nis, options => ro }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis', 'options' => 'ro' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis test ro#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, manage => false, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'manage' => false, 'options' => 'ro' } } } }
+    context '<test => { mountpoint => /mountpoint, manage => false, options => ro }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'manage' => false, 'options' => 'ro' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint -null ro#{tail}") }
     end
@@ -331,9 +343,11 @@ describe 'autofs' do
         |
         |/test1 /etc/auto.test1
         |/mountpoint2 /etc/auto.test2
-        |/mountpoint3 /etc/auto.test3 ro
-        |/mountpoint4 nis test4
-        |/mountpoint5 -null
+        |/mountpoint3 /etc/auto.testing
+        |/mountpoint4 /etc/auto.test4 ro
+        |/mountpoint5 nis test5
+        |/mountpoint6 nis auto.test
+        |/mountpoint7 -null
         |
         |+auto.master
       END
@@ -342,10 +356,12 @@ describe 'autofs' do
         {
           maps: {
             'test1' => {},
-            'test2' => { 'mountpoint' => 'mountpoint2' },
-            'test3' => { 'mountpoint' => 'mountpoint3', 'options' => 'ro' },
-            'test4' => { 'mountpoint' => 'mountpoint4', 'maptype' => 'nis' },
-            'test5' => { 'mountpoint' => 'mountpoint5', 'manage' => false },
+            'test2' => { 'mountpoint' => '/mountpoint2' },
+            'test3' => { 'mountpoint' => '/mountpoint3', 'mappath' => '/etc/auto.testing' },
+            'test4' => { 'mountpoint' => '/mountpoint4', 'options' => 'ro' },
+            'test5' => { 'mountpoint' => '/mountpoint5', 'maptype' => 'nis' },
+            'test6' => { 'mountpoint' => '/mountpoint6', 'maptype' => 'nis', 'mapname' => 'auto.test' },
+            'test7' => { 'mountpoint' => '/mountpoint7', 'manage' => false },
           },
         }
       end
@@ -354,65 +370,30 @@ describe 'autofs' do
     end
   end
 
-  # TODO: Discuss and clarify the maptype function on Solaris. Currently maptype is added to output.
+  # TODO: Discuss and clarify the maptype function on Solaris. Currently maptype is not added to the output.
+  # Tests to proof the different handling of maptype on Solaris.
   context 'with maps on Solaris (for auto.master file) set to valid value' do
     head = "# This file is being maintained by Puppet.\n# DO NOT EDIT\n\n/net -hosts\n\n"
     tail = "\n\n+auto.master\n"
     let(:facts) { { osfamily: 'Solaris' } }
 
-    context '<test => {}>' do
-      let(:params) { { maps: { 'test' => {} } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.test#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint' } } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint, maptype => nis }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis' } } } }
+    context '<test => { mountpoint => /mountpoint, maptype => nis }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint test#{tail}") }
     end
 
-    context '<test => { mountpoint => mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'manage' => false } } } }
+    context '<test => { mountpoint => /mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis', 'manage' => false } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint test#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint, manage => false }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'manage' => false } } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint -null#{tail}") }
     end
 
     # same test as above with options set
-    context '<test => { options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'options' => 'ro' } } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.test ro#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'options' => 'ro' } } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test ro#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint, maptype => nis, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'options' => 'ro' } } } }
+    context '<test => { mountpoint => /mountpoint, maptype => nis, options => ro }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => '/mountpoint', 'maptype' => 'nis', 'options' => 'ro' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint test ro#{tail}") }
-    end
-
-    context '<test => { mountpoint => mountpoint, manage => false, options => ro }>' do
-      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'manage' => false, 'options' => 'ro' } } } }
-
-      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint -null ro#{tail}") }
     end
 
     # multi mounts example with easy readable result
@@ -436,10 +417,10 @@ describe 'autofs' do
         {
           maps: {
             'test1' => {},
-            'test2' => { 'mountpoint' => 'mountpoint2' },
-            'test3' => { 'mountpoint' => 'mountpoint3', 'options' => 'ro' },
-            'test4' => { 'mountpoint' => 'mountpoint4', 'maptype' => 'nis' },
-            'test5' => { 'mountpoint' => 'mountpoint5', 'manage' => false },
+            'test2' => { 'mountpoint' => '/mountpoint2' },
+            'test3' => { 'mountpoint' => '/mountpoint3', 'options' => 'ro' },
+            'test4' => { 'mountpoint' => '/mountpoint4', 'maptype' => 'nis' },
+            'test5' => { 'mountpoint' => '/mountpoint5', 'manage' => false },
           },
         }
       end

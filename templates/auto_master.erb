@@ -6,22 +6,29 @@
 <% else -%>
 /net /etc/auto.net --timeout=60
 <% end -%>
+<% if @maps_real.any? -%>
 
-<% if @maps_real -%>
-<% @maps_real.keys.sort.each do |key| -%>
-<% if @maps_real[key]['mountpoint'] -%>
-<% if @maps_real[key]['maptype'] -%>
-/<%= @maps_real[key]['mountpoint'] -%> <%= @maps_real[key]['maptype'] -%> <%= key -%>
-<% else -%>
-/<%= @maps_real[key]['mountpoint'] %> <% if @maps_real[key]['manage'] == nil or @maps_real[key]['manage'] == true -%>/etc/auto.<%= key -%><% else -%>-null<% end -%>
+<%   @maps_real.keys.sort.each do |key| -%>
+<%     @maps_real[key]['mapname'] ? @mapname = @maps_real[key]['mapname'] : @mapname = key -%>
+<%     @maps_real[key]['mappath'] ? @mappath = @maps_real[key]['mappath'] : @mappath = "/etc/auto.#{key}" -%>
+<%     if @maps_real[key]['mountpoint'] -%>
+<%       @maps_real[key]['mountpoint'].chars.first == '/' ? @mountpoint = @maps_real[key]['mountpoint'] : @mountpoint = "/#{@maps_real[key]['mountpoint']}" -%>
+<%       if @maps_real[key]['maptype'] -%>
+<%= @mountpoint %><% if @osfamily != 'Solaris' %> <%= @maps_real[key]['maptype'] %><% end %> <%= @mapname -%>
+<%       elsif @maps_real[key]['manage'] == false -%>
+<%= @mountpoint %> -null<% # remove linebreak -%>
+<%       else -%>
+<%= @mountpoint %> <%= @mappath -%>
+<%       end -%>
+<%     else -%>
+/<%= key %> <%= @mappath -%>
+<%     end -%>
+<%     if @maps_real[key]['options'] -%>
+ <%= @maps_real[key]['options'] -%>
+<%     end %>
+<%   end -%>
 <% end -%>
-<% else -%>
-/<%= key %> /etc/auto.<%= key -%>
-<% end -%>
-<% if @maps_real[key]['options'] %> <%= @maps_real[key]['options'] %><% end %>
-<% end -%>
-<% end -%>
-
 <% if @use_nis_maps_bool -%>
+
 +<%= @nis_master_name %>
 <% end -%>

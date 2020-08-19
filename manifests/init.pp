@@ -31,28 +31,24 @@ class autofs (
       $autofs_sysconfig_default   = '/etc/sysconfig/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
-      $auto_master_template       = 'autofs/auto_master.erb'
     }
     'Suse': {
       $autofs_package_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/sysconfig/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
-      $auto_master_template       = 'autofs/auto_master.erb'
     }
     'Debian': {
       $autofs_package_default     = 'autofs'
       $autofs_sysconfig_default   = '/etc/default/autofs'
       $autofs_auto_master_default = '/etc/auto.master'
       $autofs_sysconfig_template  = 'autofs/autofs.erb'
-      $auto_master_template       = 'autofs/auto_master.erb'
     }
     'Solaris': {
       $autofs_package_default     = 'SUNWatfsr'
       $autofs_sysconfig_default   = '/etc/default/autofs'
       $autofs_auto_master_default = '/etc/auto_master'
       $autofs_sysconfig_template  = 'autofs/autofs_solaris.erb'
-      $auto_master_template       = 'autofs/auto_master_solaris.erb'
 
     }
     default: {
@@ -172,7 +168,7 @@ class autofs (
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    content => template($auto_master_template),
+    content => template('autofs/auto_master.erb'),
     require => Package['autofs'],
   }
 

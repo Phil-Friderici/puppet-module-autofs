@@ -1,0 +1,5 @@
+---
+autofs::maps:
+  'auto.proj':
+    mountpoint: 'proj'
+    file: '/path/to/file/with/mounts'

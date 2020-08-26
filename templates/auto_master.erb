@@ -9,17 +9,19 @@
 <% if @maps_real.any? -%>
 
 <%   @maps_real.keys.sort.each do |key| -%>
+<%     @maps_real[key]['mapname'] ? @mapname = @maps_real[key]['mapname'] : @mapname = key -%>
+<%     @maps_real[key]['mappath'] ? @mappath = @maps_real[key]['mappath'] : @mappath = "/etc/auto.#{key}" -%>
 <%     @maps_real[key]['options'] ? @options = " #{@maps_real[key]['options']}" : @options = nil -%>
 <%     if @maps_real[key]['mountpoint'] -%>
 <%       if @maps_real[key]['maptype'] -%>
-/<%= @maps_real[key]['mountpoint'] %><% if @osfamily != 'Solaris' %> <%= @maps_real[key]['maptype'] %><% end %> <%= key -%><%= @options %>
+/<%= @maps_real[key]['mountpoint'] %><% if @osfamily != 'Solaris' %> <%= @maps_real[key]['maptype'] %><% end %> <%= @mapname -%><%= @options %>
 <%       elsif @maps_real[key]['manage'] == false -%>
 /<%= @maps_real[key]['mountpoint'] %> -null<%= @options %>
 <%       else -%>
-/<%= @maps_real[key]['mountpoint'] %> /etc/auto.<%= key -%><%= @options %>
+/<%= @maps_real[key]['mountpoint'] %> <%= @mappath -%><%= @options %>
 <%       end -%>
 <%     else -%>
-/<%= key %> /etc/auto.<%= key -%><%= @options %>
+/<%= key %> <%= @mappath -%><%= @options %>
 <%     end -%>
 <%   end -%>
 <% end -%>

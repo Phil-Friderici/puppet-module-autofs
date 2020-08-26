@@ -278,10 +278,22 @@ describe 'autofs' do
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint /etc/auto.test#{tail}") }
     end
 
+    context '<test => { mappath => /etc/auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mappath' => '/etc/auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/test /etc/auto.testing#{tail}") }
+    end
+
     context '<test => { mountpoint => mountpoint, maptype => nis }>' do
       let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis' } } } }
 
       it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis test#{tail}") }
+    end
+
+    context '<test => { mountpoint => mountpoint, maptype => nis, mapname => auto.testing }>' do
+      let(:params) { { maps: { 'test' => { 'mountpoint' => 'mountpoint', 'maptype' => 'nis', 'mapname' => 'auto.testing' } } } }
+
+      it { is_expected.to contain_file('auto.master').with_content("#{head}/mountpoint nis auto.testing#{tail}") }
     end
 
     context '<test => { mountpoint => mountpoint, maptype => nis, manage => false }> maptype overrides manage' do
@@ -334,6 +346,8 @@ describe 'autofs' do
         |/mountpoint3 /etc/auto.test3 ro
         |/mountpoint4 nis test4
         |/mountpoint5 -null
+        |/mountpoint6 /etc/auto.testing
+        |/mountpoint7 nis auto.test
         |
         |+auto.master
       END
@@ -346,6 +360,8 @@ describe 'autofs' do
             'test3' => { 'mountpoint' => 'mountpoint3', 'options' => 'ro' },
             'test4' => { 'mountpoint' => 'mountpoint4', 'maptype' => 'nis' },
             'test5' => { 'mountpoint' => 'mountpoint5', 'manage' => false },
+            'test6' => { 'mountpoint' => 'mountpoint6', 'mappath' => '/etc/auto.testing' },
+            'test7' => { 'mountpoint' => 'mountpoint7', 'maptype' => 'nis', 'mapname' => 'auto.test' },
           },
         }
       end

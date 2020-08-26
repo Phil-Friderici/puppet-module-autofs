@@ -152,6 +152,19 @@ Specify maptype for mountpoint in `auto.master`.
 - Default: **undef**
 
 ---
+#### mapname (type: String)
+The name for the map in `auto.master`. The default of `undef` will use the name of the key used to specify the mount.
+
+- Default: **undef**
+
+---
+#### mappath (type: String)
+Absolute path of the map file to be created and used in `auto.master`. The default of `undef` will use the name of the key used to specify the mount with `/etc/auto.` as prefix.
+
+- Default: **undef**
+
+---
+
 #### mounts (type: Array)
 Specify the mounts to be mounted at mountpoint as an array.
 

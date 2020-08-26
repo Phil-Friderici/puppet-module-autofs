@@ -217,4 +217,47 @@ describe 'autofs' do
       end
     end
   end
+
+  describe 'use cases' do
+    head = "# This file is being maintained by Puppet.\n# DO NOT EDIT\n\n"
+    tail = "\n\n+auto.master\n"
+
+    # https://github.com/kodguru/puppet-module-autofs/issues/25
+    context 'issue #25 described expected behavior' do
+      let(:facts) { { group: 'issue-25_from_hiera_group' } }
+
+      it "auto.master contains correct '/proj yp auto.proj' as result" do
+        is_expected.to contain_file('auto.master').with_content("#{head}/net -hosts\n\n/proj yp auto.proj#{tail}")
+      end
+    end
+
+    context 'issue #25 described unexected behavior' do
+      let(:facts) { { fqdn: 'issue-25.from.hiera.fqdn' } }
+
+      it "auto.master contains wrong '/proj /etc/auto.auto.proj' as result" do
+        is_expected.to contain_file('auto.master').with_content("#{head}/net -hosts\n\n/proj /etc/auto.auto.proj#{tail}")
+      end
+      it "map file uses wrong '/etc/auto.auto.proj' as path" do
+        is_expected.to contain_file('mountmap_auto.proj').with_path('/etc/auto.auto.proj')
+      end
+      it "map file uses correct '/path/to/file/with/mounts' as source" do
+        is_expected.to contain_file('mountmap_auto.proj').with_source('/path/to/file/with/mounts')
+      end
+    end
+
+    context 'issue #25 fix using mappath to override previous declared mounts when using $maps_hiera_merge' do
+      let(:facts) { { fqdn: 'issue-25-fix.from.hiera.fqdn', group: 'issue-25_from_hiera_group' } }
+      let(:params) { { maps_hiera_merge: true } }
+
+      it "auto.master contains correct '/proj /etc/auto.proj' as result" do
+        is_expected.to contain_file('auto.master').with_content("#{head}/net -hosts\n\n/proj /etc/auto.proj#{tail}")
+      end
+      it "map file uses correct '/etc/auto.proj' as path" do
+        is_expected.to contain_file('mountmap_auto.proj').with_path('/etc/auto.proj')
+      end
+      it "map file uses correct '/path/to/file/with/mounts' as source" do
+        is_expected.to contain_file('mountmap_auto.proj').with_source('/path/to/file/with/mounts')
+      end
+    end
+  end
 end

@@ -40,4 +40,38 @@ define autofs::map (
     source  => $file,
     content => $content,
   }
+
+  # maptype is not used on Solaris
+  case $osfamily {
+    'Solaris': { $maptype_real = '' }
+    default:   { $maptype_real = " ${maptype}"   }
+  }
+
+  case $options {
+    undef:   { $options_real = '' }
+    default: { $options_real = " ${options}" }
+  }
+
+  # build string for map, considering if maptype and format are set
+  if $mountpoint {
+    if $maptype {
+      $mount = "/${mountpoint}${maptype_real} ${name}${options_real}"
+    }
+    elsif $manage == false {
+      $mount = "/${mountpoint} -null${options_real}"
+    }
+    else {
+      $mount = "/${mountpoint} /etc/auto.${name}${options_real}"
+    }
+  }
+  else {
+    $mount = "/${name} /etc/auto.${name}${options_real}"
+  }
+
+  concat::fragment { "auto.master2_${name}":
+    target  => '/etc/auto.master2',
+    content => "${mount}\n",
+    order   => '10',
+  }
+
 }

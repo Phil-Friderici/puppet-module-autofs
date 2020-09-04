@@ -182,6 +182,38 @@ class autofs (
     subscribe => [
       File['autofs_sysconfig'],
       File['auto.master'],
+      Concat['/etc/auto.master2'],
     ],
+  }
+
+  concat { '/etc/auto.master2':
+    owner => 'root',
+    group => 'root',
+    mode  => '0644',
+  }
+
+  concat::fragment { 'auto.master2_header':
+    target  => '/etc/auto.master2',
+    content => "# This file is being maintained by Puppet.\n# DO NOT EDIT\n\n",
+    order   => '00',
+  }
+
+  case $use_dash_hosts_for_net {
+    true:    { $net = '/net -hosts' }
+    default: { $net = '/net /etc/auto.net --timeout=60' }
+  }
+
+  concat::fragment { 'auto.master2_net':
+    target  => '/etc/auto.master2',
+    content => "${net}\n\n",
+    order   => '01',
+  }
+
+  if $use_nis_maps_bool {
+    concat::fragment { 'auto.master2_nis_master':
+      target  => '/etc/auto.master2',
+      content => "\n+${nis_master_name}\n",
+      order   => '100',
+    }
   }
 }
